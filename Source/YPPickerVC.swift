@@ -56,7 +56,9 @@ public class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
             locationManager.delegate = self
             locationManager.desiredAccuracy = YPConfig.geocodeAccuracy
 
-            if CLLocationManager.authorizationStatus() != .denied {
+            if CLLocationManager.locationServicesEnabled(),
+                CLLocationManager.authorizationStatus() != .denied {
+                
                 locationManager.requestWhenInUseAuthorization()
                 locationManager.startUpdatingLocation()
             }
