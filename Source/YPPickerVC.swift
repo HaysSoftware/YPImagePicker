@@ -39,6 +39,9 @@ public class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
     private var cameraVC: YPCameraVC?
     private var videoVC: YPVideoCaptureVC?
     
+    private lazy var locationManager: CLLocationManager = { return CLLocationManager() }()
+    private var currentLocation: CLLocation?
+
     var mode = Mode.camera
     
     var capturedImage: UIImage?
@@ -49,6 +52,15 @@ public class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
         view.backgroundColor = UIColor(r: 247, g: 247, b: 247)
         
         delegate = self
+        if YPConfig.geocodeMedia {
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = YPConfig.geocodeAccuracy
+
+            if CLLocationManager.authorizationStatus() != .denied {
+                locationManager.requestWhenInUseAuthorization()
+                locationManager.startUpdatingLocation()
+            }
+        }
         
         // Force Library only when using `minNumberOfItems`.
         if YPConfig.library.minNumberOfItems > 1 {
@@ -65,8 +77,9 @@ public class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
         if YPConfig.screens.contains(.photo) {
             cameraVC = YPCameraVC()
             cameraVC?.didCapturePhoto = { [weak self] img in
-                self?.didSelectItems?([YPMediaItem.photo(p: YPMediaPhoto(image: img,
-                                                                        fromCamera: true))])
+                let photo = YPMediaPhoto(image: img, fromCamera: true)
+                photo.location = YPConfig.geocodeMedia ? self?.currentLocation : nil
+                self?.didSelectItems?([YPMediaItem.photo(p: photo)])
             }
         }
         
@@ -365,5 +378,14 @@ extension YPPickerVC: YPLibraryViewDelegate {
         self.dismiss(animated: true) {
             self.imagePickerDelegate?.noPhotos()
         }
+    }
+}
+
+extension YPPickerVC : CLLocationManagerDelegate {
+    public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        manager.startUpdatingLocation()
+    }
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        self.currentLocation = locations.first
     }
 }

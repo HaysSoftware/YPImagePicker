@@ -8,25 +8,29 @@
 
 import Foundation
 import Photos
+import CoreLocation
 
 public class YPPhotoSaver {
-    class func trySaveImage(_ image: UIImage, inAlbumNamed: String) {
+    class func trySaveImage(_ image: UIImage, inAlbumNamed: String, location: CLLocation?) {
         if PHPhotoLibrary.authorizationStatus() == .authorized {
             if let album = album(named: inAlbumNamed) {
-                saveImage(image, toAlbum: album)
+                saveImage(image, toAlbum: album, location: location)
             } else {
                 createAlbum(withName: inAlbumNamed) {
                     if let album = album(named: inAlbumNamed) {
-                        saveImage(image, toAlbum: album)
+                        saveImage(image, toAlbum: album, location: location)
                     }
                 }
             }
         }
     }
     
-    fileprivate class func saveImage(_ image: UIImage, toAlbum album: PHAssetCollection) {
+    fileprivate class func saveImage(_ image: UIImage, toAlbum album: PHAssetCollection, location: CLLocation? = nil) {
         PHPhotoLibrary.shared().performChanges({
             let changeRequest = PHAssetChangeRequest.creationRequestForAsset(from: image)
+            if let location = location {
+                changeRequest.location = location
+            }
             let albumChangeRequest = PHAssetCollectionChangeRequest(for: album)
             let enumeration: NSArray = [changeRequest.placeholderForCreatedAsset!]
             albumChangeRequest?.addAssets(enumeration)

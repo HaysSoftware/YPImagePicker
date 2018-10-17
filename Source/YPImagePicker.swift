@@ -96,7 +96,7 @@ public class YPImagePicker: UINavigationController {
                     if YPConfig.shouldSaveNewPicturesToAlbum {
                         let isModified = photo.modifiedImage != nil
                         if photo.fromCamera || (!photo.fromCamera && isModified) {
-                            YPPhotoSaver.trySaveImage(photo.image, inAlbumNamed: YPConfig.albumName)
+                            YPPhotoSaver.trySaveImage(photo.image, inAlbumNamed: YPConfig.albumName, location: photo.location)
                         }
                     }
                     self?.didSelect(items: [mediaItem])

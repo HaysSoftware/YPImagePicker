@@ -54,7 +54,7 @@ public class YPSelectionsGalleryVC: UIViewController {
         if YPConfig.shouldSaveNewPicturesToAlbum {
             for m in items {
                 if case let .photo(p) = m, let modifiedImage = p.modifiedImage {
-                    YPPhotoSaver.trySaveImage(modifiedImage, inAlbumNamed: YPConfig.albumName)
+                    YPPhotoSaver.trySaveImage(modifiedImage, inAlbumNamed: YPConfig.albumName, location: p.asset?.location)
                 }
             }
         }

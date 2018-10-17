@@ -10,6 +10,7 @@ import Foundation
 import AVFoundation
 import UIKit
 import Photos
+import CoreLocation
 
 /// Typealias for code prettiness
 internal var YPConfig: YPImagePickerConfiguration { return YPImagePickerConfiguration.shared }
@@ -42,6 +43,12 @@ public struct YPImagePickerConfiguration {
     
     /// Enables selecting the front camera by default, useful for avatars. Defaults to false
     public var usesFrontCamera = false
+    
+    /// Enables attempt to geocode media before they are stored. Defaults to true
+    public var geocodeMedia = true
+    
+    /// Specifies accuracy of geocoding.  Defaults to kCLLocationAccuracyBest    
+    public var geocodeAccuracy: CLLocationAccuracy = kCLLocationAccuracyBest
     
     /// Adds a Filter step in the photo taking process.  Defaults to true
     public var showsFilters = true
