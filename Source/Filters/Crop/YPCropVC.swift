@@ -11,6 +11,7 @@ import UIKit
 public enum YPCropType {
     case none
     case rectangle(ratio: Double)
+    case greaterThan(ratio: Double)
 }
 
 class YPCropVC: UIViewController {

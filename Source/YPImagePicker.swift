@@ -103,8 +103,18 @@ public class YPImagePicker: UINavigationController {
                 }
                 
                 func showCropVC(photo: YPMediaPhoto, completion: @escaping (_ aphoto: YPMediaPhoto) -> Void) {
-                    if case let YPCropType.rectangle(ratio) = YPConfig.showsCrop {
-                        let cropVC = YPCropVC(image: photo.image, ratio: ratio)
+                    var cropVC: YPCropVC?
+                    switch YPConfig.showsCrop {
+                    case let .rectangle(ratio):
+                        cropVC = YPCropVC(image: photo.image, ratio: ratio)
+                    case let .greaterThan(ratio):
+                        if (CGFloat(ratio) < (photo.image.size.width / photo.image.size.height)) {
+                            cropVC = YPCropVC(image: photo.image, ratio: ratio)
+                        }
+                    default:
+                        break
+                    }
+                    if let cropVC = cropVC {
                         cropVC.didFinishCropping = { croppedImage in
                             photo.modifiedImage = croppedImage
                             completion(photo)
