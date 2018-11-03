@@ -72,6 +72,9 @@ public struct YPImagePickerConfiguration {
     /// Adds a Crop step in the photo taking process, after filters.  Defaults to .none
     public var showsCrop: YPCropType = .none
     
+    public var cropButtonAlignment: (horizontal: YPAlignment.Hotizontal, vertical: YPAlignment.Vertial) = (.left, .bottom)
+    public var multiSelectButtonAlignment: (horizontal: YPAlignment.Hotizontal, vertical: YPAlignment.Vertial) = (.right, .bottom)
+
     /// Ex: cappedTo:1024 will make sure images from the library or the camera will be
     /// resized to fit in a 1024x1024 box. Defaults to original image size.
     public var targetImageSize = YPImageSize.original
@@ -216,6 +219,15 @@ public struct YPConfigVideo {
     /// The minimum duration allowed for the trimming.
     /// The handles won't pan further if the minimum duration is attained.
     public var trimmerMinDuration: Double = 3.0
+}
+
+public enum YPAlignment {
+    public enum Vertial {
+        case top, bottom
+    }
+    public enum Hotizontal {
+        case left, right
+    }
 }
 
 public enum YPlibraryMediaType {

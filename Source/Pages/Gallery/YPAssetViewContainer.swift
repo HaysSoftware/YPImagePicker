@@ -71,17 +71,39 @@ class YPAssetViewContainer: UIView {
             squareCropButton.setImage(YPConfig.icons.cropIcon, for: .normal)
             sv(squareCropButton)
             squareCropButton.size(42)
-            |-15-squareCropButton
-            squareCropButton.Bottom == zoomableView!.Bottom - 15
+            switch YPConfig.cropButtonAlignment.horizontal {
+            case .left:
+                |-15-squareCropButton
+            case .right:
+                squareCropButton-15-|
+            }
+
+            switch YPConfig.cropButtonAlignment.vertical {
+            case .top:
+                squareCropButton.Top == zoomableView!.Top + 15
+            case .bottom:
+                squareCropButton.Bottom == zoomableView!.Bottom - 15
+            }
         }
         
         // Multiple selection button
         sv(multipleSelectionButton)
         multipleSelectionButton.size(42)
-        multipleSelectionButton-15-|
         multipleSelectionButton.setImage(YPConfig.icons.multipleSelectionOffIcon, for: .normal)
-        multipleSelectionButton.Bottom == zoomableView!.Bottom - 15
+
+        switch YPConfig.multiSelectButtonAlignment.horizontal {
+        case .left:
+            |-15-multipleSelectionButton
+        case .right:
+            multipleSelectionButton-15-|
+        }
         
+        switch YPConfig.multiSelectButtonAlignment.vertical {
+        case .top:
+            multipleSelectionButton.Top == zoomableView!.Top + 15
+        case .bottom:
+            multipleSelectionButton.Bottom == zoomableView!.Bottom - 15
+        }
     }
     
     // MARK: - Square button
