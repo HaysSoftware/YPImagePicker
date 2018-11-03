@@ -69,7 +69,7 @@ public class YPBottomPager: UIViewController, UIScrollViewDelegate {
         // Build headers
         for (index, c) in controllers.enumerated() {
             let menuItem = YPMenuItem()
-            menuItem.textLabel.text = c.title?.capitalized
+            menuItem.textLabel.text = c.navigationTitle?.capitalized
             menuItem.button.tag = index
             menuItem.button.addTarget(self,
                                       action: #selector(tabTapped(_:)),
@@ -116,5 +116,16 @@ public class YPBottomPager: UIViewController, UIScrollViewDelegate {
         }
         let currentMenuItem = v.header.menuItems[page]
         currentMenuItem.select()
+    }
+}
+
+extension UIViewController {
+    var navigationTitle: String? {
+        switch self {
+        case is YPLibraryVC:
+            return YPConfig.library.navigationTitle
+        default:
+            return self.title
+        }
     }
 }
