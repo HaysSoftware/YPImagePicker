@@ -21,6 +21,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     internal let mediaManager = LibraryMediaManager()
     internal var latestImageTapped = ""
     internal let panGestureHelper = PanGestureHelper()
+    internal let cropTapGesture = UITapGestureRecognizer()
 
     // MARK: - Init
     
@@ -86,11 +87,14 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                 strongSelf.updateCropInfo()
             }
         }
+        
+        cropTapGesture.numberOfTapsRequired = 2
+        cropTapGesture.addTarget(self, action: #selector(squareCropButtonTapped))
     }
     
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+        v.assetViewContainer.addGestureRecognizer(cropTapGesture)
         v.assetViewContainer.squareCropButton
             .addTarget(self,
                        action: #selector(squareCropButtonTapped),
