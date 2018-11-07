@@ -12,7 +12,7 @@ import Photos
 
 final class YPLibraryView: UIView {
     
-    let assetZoomableViewMinimalVisibleHeight: CGFloat  = 50
+    let assetZoomableViewMinimalVisibleHeight: CGFloat  = 70
     
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var assetZoomableView: YPAssetZoomableView!
