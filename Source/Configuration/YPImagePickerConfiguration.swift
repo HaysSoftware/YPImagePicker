@@ -23,6 +23,8 @@ public struct YPImagePickerConfiguration {
     /// Scroll to change modes, defaults to true
     public var isScrollToChangeModesEnabled = true
     
+    public var assetViewMinimumHeight: CGFloat = 50
+    
     // Library configuration
     public var library = YPConfigLibrary()
     
