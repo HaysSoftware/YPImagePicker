@@ -14,6 +14,12 @@ public enum YPCropType {
     case greaterThan(ratio: Double)
 }
 
+public enum YPCropNavigation {
+    case toolbar
+    case navigationBar
+}
+
+
 class YPCropVC: UIViewController {
     
     public var didFinishCropping: ((UIImage) -> Void)?
@@ -54,11 +60,19 @@ class YPCropVC: UIViewController {
         let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         
         let saveButton = UIBarButtonItem(title: YPConfig.wordings.save,
-                                           style: .plain,
-                                           target: self,
-                                           action: #selector(done))
+                                         style: .plain,
+                                         target: self,
+                                         action: #selector(done))
         saveButton.tintColor = .white
-        v.toolbar.items = [cancelButton, flexibleSpace, saveButton]
+
+        switch YPConfig.cropNavigation {
+        case .navigationBar:
+            saveButton.title = YPConfig.wordings.next
+            self.navigationItem.rightBarButtonItem = saveButton
+        case .toolbar:
+            v.toolbar.items = [cancelButton, flexibleSpace, saveButton]
+        }
+        
     }
     
     func setupGestureRecognizers() {

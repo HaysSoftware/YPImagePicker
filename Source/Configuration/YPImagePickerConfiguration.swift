@@ -72,6 +72,8 @@ public struct YPImagePickerConfiguration {
     /// Adds a Crop step in the photo taking process, after filters.  Defaults to .none
     public var showsCrop: YPCropType = .none
     
+    public var cropNavigation: YPCropNavigation = .toolbar
+    
     public var cropButtonAlignment: (horizontal: YPAlignment.Hotizontal, vertical: YPAlignment.Vertial) = (.left, .bottom)
     public var multiSelectButtonAlignment: (horizontal: YPAlignment.Hotizontal, vertical: YPAlignment.Vertial) = (.right, .bottom)
 
