@@ -22,7 +22,7 @@ final class YPAssetZoomableView: UIScrollView {
     public var isVideoMode = false
     public var photoImageView = UIImageView()
     public var videoView = YPVideoView()
-    public var squaredZoomScale: CGFloat = 1
+    public var aspectZoomScale: CGFloat = 1
     public var minWidth: CGFloat? = YPConfig.library.minWidthForItem
     
     fileprivate var currentAsset: PHAsset?
@@ -37,9 +37,9 @@ final class YPAssetZoomableView: UIScrollView {
     /// - Parameters:
     ///   - fit: If true - zoom to show squared. If false - show full.
     public func fitImage(_ fit: Bool, animated isAnimated: Bool = false) {
-        squaredZoomScale = calculateSquaredZoomScale()
+        aspectZoomScale = calculateZoomScale()
         if fit {
-            setZoomScale(squaredZoomScale, animated: isAnimated)
+            setZoomScale(aspectZoomScale, animated: isAnimated)
         } else {
             setZoomScale(1, animated: isAnimated)
         }
@@ -132,29 +132,25 @@ final class YPAssetZoomableView: UIScrollView {
         self.zoomScale = 1
         
         // Calculating and setting the image view frame depending on screenWidth
-        let screenWidth: CGFloat = UIScreen.main.bounds.width
+        let viewSize: CGSize = self.bounds.size
         let w = image.size.width
         let h = image.size.height
 
-        var aspectRatio: CGFloat = 1
         var zoomScale: CGFloat = 1
 
-        if w > h { // Landscape
-            aspectRatio = h / w
-            view.frame.size.width = screenWidth
-            view.frame.size.height = screenWidth * aspectRatio
-        } else if h > w { // Portrait
-            aspectRatio = w / h
-            view.frame.size.width = screenWidth * aspectRatio
-            view.frame.size.height = screenWidth
+        switch image.size.orientation {
+        case .landscape:
+            view.frame.size.width = viewSize.width
+            view.frame.size.height = viewSize.width / image.size.aspectRatio()
+        case .portrait: fallthrough
+        case .square:
+            view.frame.size.width = viewSize.height * image.size.aspectRatio()
+            view.frame.size.height = viewSize.height
             
             if let minWidth = minWidth {
-                let k = minWidth / screenWidth
+                let k = minWidth / viewSize.width
                 zoomScale = (h / w) * k
             }
-        } else { // Square
-            view.frame.size.width = screenWidth
-            view.frame.size.height = screenWidth
         }
         
         // Centering image view
@@ -166,23 +162,19 @@ final class YPAssetZoomableView: UIScrollView {
         self.zoomScale = zoomScale
     }
     
-    /// Calculate zoom scale which will fit the image to square
-    fileprivate func calculateSquaredZoomScale() -> CGFloat {
+    /// Calculate zoom scale which will fit the image to the view
+    fileprivate func calculateZoomScale() -> CGFloat {
         guard let image = assetImageView.image else {
             print("YPAssetZoomableView >>> No image"); return 1.0
         }
         
-        var squareZoomScale: CGFloat = 1.0
-        let w = image.size.width
-        let h = image.size.height
-        
-        if w > h { // Landscape
-            squareZoomScale = (w / h)
-        } else if h > w { // Portrait
-            squareZoomScale = (h / w)
+        switch image.size.orientation {
+        case .landscape:
+            return image.size.aspectRatio() / bounds.size.aspectRatio()
+        case .portrait: fallthrough
+        case .square:
+            return image.size.flipped().aspectRatio() * bounds.size.aspectRatio()
         }
-        
-        return squareZoomScale
     }
     
     // Centring the image frame
@@ -238,7 +230,7 @@ extension YPAssetZoomableView: UIScrollViewDelegate {
         guard let view = view, view == photoImageView || view == videoView else { return }
         
         // prevent to zoom out
-        if YPConfig.library.onlySquare && scale < squaredZoomScale {
+        if YPConfig.library.onlySquare && scale < aspectZoomScale {
             self.fitImage(true, animated: true)
         }
         
@@ -253,4 +245,46 @@ extension YPAssetZoomableView: UIScrollViewDelegate {
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         cropAreaDidChange()
     }
+}
+
+public typealias AspectRatio = CGSize
+public extension AspectRatio {
+    enum Orientation {
+        case landscape
+        case portrait
+        case square
+    }
+    func aspectRatio(precision: Int? = nil) -> CGFloat {
+        let aspectRatio = width / height
+        
+        guard let precision = precision else {
+            return aspectRatio
+        }
+        
+        let multiplier = pow(10, Double(precision))
+        
+        let value = (Double(aspectRatio) * multiplier).rounded() / multiplier
+        return CGFloat(value)
+    }
+    
+    var orientation: Orientation {
+        switch self.aspectRatio() {
+        case let aspect where aspect > 1.0:
+            return .landscape
+        case let aspect where aspect < 1.0:
+            return .portrait
+        default:
+            return .square
+        }
+    }
+    
+    func flipped() -> AspectRatio {
+        return AspectRatio(width: height, height: width)
+    }
+    
+    static let square = AspectRatio(width: 1.0, height: 1.0)
+    static let standard = AspectRatio(width: 4.0, height: 3.0)
+    static let wideScreen = AspectRatio(width: 16.0, height: 9.0)
+    static let theater = AspectRatio(width: 21.0, height: 9.0)
+    static let imax = AspectRatio(width: 1.9, height: 1.0)
 }

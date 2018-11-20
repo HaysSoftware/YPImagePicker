@@ -111,7 +111,7 @@ class YPAssetViewContainer: UIView {
     @objc public func squareCropButtonTapped() {
         if let zoomableView = zoomableView {
             let z = zoomableView.zoomScale
-            shouldCropToSquare = (z >= 1 && z < zoomableView.squaredZoomScale)
+            shouldCropToSquare = (z >= 1 && z < zoomableView.aspectZoomScale)
         }
         zoomableView?.fitImage(shouldCropToSquare, animated: true)
     }
@@ -122,8 +122,8 @@ class YPAssetViewContainer: UIView {
             squareCropButton.isHidden = true
         } else {
             if let image = zoomableView?.assetImageView.image {
-                let isImageASquare = image.size.width == image.size.height
-                squareCropButton.isHidden = isImageASquare
+                let isSameAspect = image.size.aspectRatio(precision: 3) == self.zoomableView?.frame.size.aspectRatio(precision: 3)
+                squareCropButton.isHidden = isSameAspect
             }
         }
         

@@ -25,6 +25,8 @@ public struct YPImagePickerConfiguration {
     
     public var assetViewMinimumHeight: CGFloat = 50
     
+    public var imageCropAspectRatio: AspectRatio = .square
+    
     // Library configuration
     public var library = YPConfigLibrary()
     
