@@ -106,10 +106,13 @@ public class YPImagePicker: UINavigationController {
                     var cropVC: YPCropVC?
                     switch YPConfig.showsCrop {
                     case let .rectangle(ratio):
-                        cropVC = YPCropVC(image: photo.image, ratio: ratio)
-                    case let .greaterThan(ratio):
-                        if (CGFloat(ratio) < (photo.image.size.width / photo.image.size.height)) {
-                            cropVC = YPCropVC(image: photo.image, ratio: ratio)
+                        cropVC = YPCropVC(image: photo.image, ratio: Double(ratio.aspectRatio()))
+                    case let .greaterThan(ratio, includeFlipped):
+                        if (ratio.aspectRatio(precision: 3) < photo.image.size.aspectRatio(precision: 3)) {
+                            cropVC = YPCropVC(image: photo.image, ratio: Double(ratio.aspectRatio()))
+                        }
+                        else if includeFlipped && (ratio.flipped().aspectRatio(precision: 3) > photo.image.size.aspectRatio(precision: 3)) {
+                            cropVC = YPCropVC(image: photo.image, ratio: Double(ratio.flipped().aspectRatio()))
                         }
                     default:
                         break

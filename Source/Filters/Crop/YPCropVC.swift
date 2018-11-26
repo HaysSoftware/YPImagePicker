@@ -10,8 +10,8 @@ import UIKit
 
 public enum YPCropType {
     case none
-    case rectangle(ratio: Double)
-    case greaterThan(ratio: Double)
+    case rectangle(ratio: AspectRatio)
+    case greaterThan(ratio: AspectRatio, includeFlipped: Bool)
 }
 
 public enum YPCropNavigation {
