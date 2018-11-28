@@ -88,4 +88,15 @@ extension YPlibraryMediaType {
                                PHAssetMediaType.video.rawValue)
         }
     }
+    
+    func fetchAssets(options: PHFetchOptions?) -> PHFetchResult<PHAsset> {
+        switch self {
+        case .photo:
+            return PHAsset.fetchAssets(with: .image, options: options)
+        case .video:
+            return PHAsset.fetchAssets(with: .video, options: options)
+        default:
+            return PHAsset.fetchAssets(with:options)
+        }
+    }
 }
