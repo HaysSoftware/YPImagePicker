@@ -9,7 +9,7 @@
 import UIKit
 import Photos
 
-struct YPAlbum {
+public struct YPAlbum {
     var thumbnail: UIImage?
     var title: String = ""
     var numberOfItems: Int = 0

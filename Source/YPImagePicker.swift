@@ -12,6 +12,9 @@ import Photos
 
 public protocol YPImagePickerDelegate: AnyObject {
     func noPhotos()
+    func imagePicker(_ imagePicker: YPImagePicker, didSwitchModeFrom fromMode: YPPickerVC.Mode, toMode: YPPickerVC.Mode)
+    func imagePicker(_ imagePicker: YPImagePicker, didTakePhoto photo: YPMediaPhoto)
+    func imagePicker(_ imagePicker: YPImagePicker, didChangePhotoAlbum album: YPAlbum)
 }
 
 public class YPImagePicker: UINavigationController {
@@ -90,6 +93,9 @@ public class YPImagePicker: UINavigationController {
             let item = items.first!
             switch item {
             case .photo(let photo):
+                if let self = self {
+                    self.imagePickerDelegate?.imagePicker(self, didTakePhoto: photo)
+                }
                 let completion = { (photo: YPMediaPhoto) in
                     let mediaItem = YPMediaItem.photo(p: photo)
                     // Save new image or existing but modified, to the photo album.
@@ -175,6 +181,14 @@ public class YPImagePicker: UINavigationController {
 }
 
 extension YPImagePicker: ImagePickerDelegate {
+    func imagePicker(_ imagePicker: YPPickerVC, didChangePhotoAlbum album: YPAlbum) {
+        self.imagePickerDelegate?.imagePicker(self, didChangePhotoAlbum: album)
+    }
+    
+    func imagePicker(_ imagePicker: YPPickerVC, didSwitchModeFrom fromMode: YPPickerVC.Mode, toMode: YPPickerVC.Mode) {
+        self.imagePickerDelegate?.imagePicker(self, didSwitchModeFrom: fromMode, toMode: toMode)
+    }
+    
     func noPhotos() {
         self.imagePickerDelegate?.noPhotos()
     }

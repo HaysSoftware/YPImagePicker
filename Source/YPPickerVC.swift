@@ -12,6 +12,8 @@ import Photos
 
 protocol ImagePickerDelegate: AnyObject {
     func noPhotos()
+    func imagePicker(_ imagePicker: YPPickerVC, didSwitchModeFrom fromMode: YPPickerVC.Mode, toMode: YPPickerVC.Mode)
+    func imagePicker(_ imagePicker: YPPickerVC, didChangePhotoAlbum album: YPAlbum)
 }
 
 public class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
@@ -29,7 +31,7 @@ public class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
     public var didClose:(() -> Void)?
     public var didSelectItems: (([YPMediaItem]) -> Void)?
     
-    enum Mode {
+    public enum Mode {
         case library
         case camera
         case video
@@ -42,7 +44,11 @@ public class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
     private lazy var locationManager: CLLocationManager = { return CLLocationManager() }()
     private var currentLocation: CLLocation?
 
-    var mode = Mode.camera
+    var mode = Mode.camera {
+        didSet {
+            self.imagePickerDelegate?.imagePicker(self, didSwitchModeFrom: oldValue, toMode: mode)
+        }
+    }
     
     var capturedImage: UIImage?
     
@@ -218,6 +224,10 @@ public class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
             self?.libraryVC?.refreshMediaRequest()
             self?.setTitleViewWithTitle(aTitle: album.title)
             self?.dismiss(animated: true, completion: nil)
+            
+            if let self = self {
+                self.imagePickerDelegate?.imagePicker(self, didChangePhotoAlbum: album)
+            }
         }
         present(navVC, animated: true, completion: nil)
     }
