@@ -44,7 +44,7 @@ public class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
     private lazy var locationManager: CLLocationManager = { return CLLocationManager() }()
     private var currentLocation: CLLocation?
 
-    var mode = Mode.camera {
+    var mode = Mode.library {
         didSet {
             self.imagePickerDelegate?.imagePicker(self, didSwitchModeFrom: oldValue, toMode: mode)
         }
