@@ -282,6 +282,14 @@ public extension AspectRatio {
         return AspectRatio(width: height, height: width)
     }
     
+    func width(for height: CGFloat) -> CGFloat {
+        return height * aspectRatio()
+    }
+    
+    func height(for width: CGFloat) -> CGFloat {
+        return width / aspectRatio()
+    }
+    
     static let square = AspectRatio(width: 1.0, height: 1.0)
     static let standard = AspectRatio(width: 4.0, height: 3.0)
     static let wideScreen = AspectRatio(width: 16.0, height: 9.0)

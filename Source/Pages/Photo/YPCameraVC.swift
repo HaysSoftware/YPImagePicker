@@ -112,8 +112,8 @@ public class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, YPPermis
             
             var image = shotImage
             // Crop the image if the output needs to be square.
-            if YPConfig.onlySquareImagesFromCamera {
-                image = self.cropImageToSquare(image)
+            if let aspectRatio = YPConfig.cameraImageAspectRatio {
+                image = self.crop(image: image, to: aspectRatio)
             }
 
             // Flip image if taken form the front camera.
@@ -128,24 +128,26 @@ public class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, YPPermis
         }
     }
     
-    func cropImageToSquare(_ image: UIImage) -> UIImage {
-        let orientation: UIDeviceOrientation = UIDevice.current.orientation
-        var imageWidth = image.size.width
-        var imageHeight = image.size.height
-        switch orientation {
+    func crop(image: UIImage, to aspectRatio: AspectRatio) -> UIImage {
+        var croppedImage: CGImage?
+        switch UIDevice.current.orientation {
         case .landscapeLeft, .landscapeRight:
-            // Swap width and height if orientation is landscape
-            imageWidth = image.size.height
-            imageHeight = image.size.width
+            var imageHeight = image.size.height
+            var imageWidth = aspectRatio.flipped().width(for: image.size.height)
+            let rcy = image.size.width * 0.5
+            let cropRect = CGRect(x: rcy - (imageWidth * 0.5), y: 0, width: imageWidth, height: imageHeight)
+            croppedImage = image.cgImage?.cropping(to: cropRect)
         default:
-            break
+            var imageWidth = image.size.width
+            var imageHeight = aspectRatio.height(for: imageWidth)
+            let rcy = image.size.height * 0.5
+            let cropRect = CGRect(x: rcy - (imageHeight * 0.5), y: 0, width: imageHeight, height: imageWidth)
+            croppedImage = image.cgImage?.cropping(to: cropRect)
         }
+
+        guard let imageRef = croppedImage else { return image }
         
-        // The center coordinate along Y axis
-        let rcy = imageHeight * 0.5
-        let rect = CGRect(x: rcy - imageWidth * 0.5, y: 0, width: imageWidth, height: imageWidth)
-        let imageRef = image.cgImage?.cropping(to: rect)
-        return UIImage(cgImage: imageRef!, scale: 1.0, orientation: image.imageOrientation)
+        return UIImage(cgImage: imageRef, scale: 1.0, orientation: image.imageOrientation)
     }
     
     // Used when image is taken from the front camera.
