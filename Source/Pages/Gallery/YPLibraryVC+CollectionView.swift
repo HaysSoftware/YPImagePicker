@@ -56,25 +56,44 @@ extension YPLibraryVC {
     
     /// Removes cell from selection
     func deselect(indexPath: IndexPath) {
-        if let positionIndex = selection.index(where: { $0.index == indexPath.row }) {
+        if let positionIndex = selection.firstIndex(where: { $0.assetIdentifier == mediaManager.fetchResult[indexPath.row].localIdentifier }) {
             selection.remove(at: positionIndex)
+
             // Refresh the numbers
-            
-            let selectedIndexPaths = selection.map { IndexPath(row: $0.index, section: 0 )}
+            var selectedIndexPaths = [IndexPath]()
+            mediaManager.fetchResult.enumerateObjects { [unowned self] (asset, index, _) in
+                if self.selection.contains(where: { $0.assetIdentifier == asset.localIdentifier }) {
+                    selectedIndexPaths.append(IndexPath(row: index, section: 0))
+                }
+            }
             v.collectionView.reloadItems(at: selectedIndexPaths)
-            
+			
+            // Replace the current selected image with the previously selected one
+            if let previouslySelectedIndexPath = selectedIndexPaths.last {
+                v.collectionView.deselectItem(at: indexPath, animated: false)
+                v.collectionView.selectItem(at: previouslySelectedIndexPath, animated: false, scrollPosition: [])
+                currentlySelectedIndex = previouslySelectedIndexPath.row
+                changeAsset(mediaManager.fetchResult[previouslySelectedIndexPath.row])
+            }
+			
             checkLimit()
         }
     }
     
     /// Adds cell to selection
     func addToSelection(indexPath: IndexPath) {
-        selection.append(YPLibrarySelection(index: indexPath.row, cropRect: nil))
+        let asset = mediaManager.fetchResult[indexPath.item]
+        selection.append(
+            YPLibrarySelection(
+                index: indexPath.row,
+                assetIdentifier: asset.localIdentifier
+            )
+        )
         checkLimit()
     }
     
-    func isInSelectionPull(indexPath: IndexPath) -> Bool {
-        return selection.contains(where: { $0.index == indexPath.row })
+    func isInSelectionPool(indexPath: IndexPath) -> Bool {
+        return selection.contains(where: { $0.assetIdentifier == mediaManager.fetchResult[indexPath.row].localIdentifier })
     }
     
     /// Checks if there can be selected more items. If no - present warning.
@@ -119,7 +138,15 @@ extension YPLibraryVC: UICollectionViewDelegate {
         cell.isSelected = currentlySelectedIndex == indexPath.row
         
         // Set correct selection number
-        if let index = selection.index(where: { $0.index == indexPath.row }) {
+        if let index = selection.firstIndex(where: { $0.assetIdentifier == asset.localIdentifier }) {
+            let currentSelection = selection[index]
+            if currentSelection.index < 0 {
+                selection[index] = YPLibrarySelection(index: indexPath.row,
+                                                      cropRect: currentSelection.cropRect,
+                                                      scrollViewContentOffset: currentSelection.scrollViewContentOffset,
+                                                      scrollViewZoomScale: currentSelection.scrollViewZoomScale,
+                                                      assetIdentifier: currentSelection.assetIdentifier)
+            }
             cell.multipleSelectionIndicator.set(number: index + 1) // start at 1, not 0
         } else {
             cell.multipleSelectionIndicator.set(number: nil)
@@ -136,11 +163,6 @@ extension YPLibraryVC: UICollectionViewDelegate {
         let previouslySelectedIndexPath = IndexPath(row: currentlySelectedIndex, section: 0)
         currentlySelectedIndex = indexPath.row
 
-        // If this is the only selected cell, do not deselect.
-        if selection.count == 1 && selection.first?.index == indexPath.row {
-            return
-        }
-        
         changeAsset(mediaManager.fetchResult[indexPath.row])
         panGestureHelper.resetToOriginalState()
         
@@ -152,9 +174,9 @@ extension YPLibraryVC: UICollectionViewDelegate {
 
         if multipleSelectionEnabled {
             
-            let cellIsInTheSelectionPool = isInSelectionPull(indexPath: indexPath)
+            let cellIsInTheSelectionPool = isInSelectionPool(indexPath: indexPath)
             let cellIsCurrentlySelected = previouslySelectedIndexPath.row == currentlySelectedIndex
-            
+
             if cellIsInTheSelectionPool {
                 if cellIsCurrentlySelected {
                     deselect(indexPath: indexPath)
@@ -165,12 +187,13 @@ extension YPLibraryVC: UICollectionViewDelegate {
         } else {
             let previouslySelectedIndices = selection
             selection.removeAll()
+            addToSelection(indexPath: indexPath)
             if let selectedRow = previouslySelectedIndices.first?.index {
                 let previouslySelectedIndexPath = IndexPath(row: selectedRow, section: 0)
                 collectionView.reloadItems(at: [previouslySelectedIndexPath])
             }
         }
-        
+
         collectionView.reloadItems(at: [indexPath])
         collectionView.reloadItems(at: [previouslySelectedIndexPath])
     }

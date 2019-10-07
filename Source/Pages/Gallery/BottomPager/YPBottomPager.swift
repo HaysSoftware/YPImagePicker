@@ -13,8 +13,7 @@ protocol YPBottomPagerDelegate: class {
     func pagerScrollViewDidScroll(_ scrollView: UIScrollView)
     func pagerDidSelectController(_ vc: UIViewController)
 }
-
-public class YPBottomPager: UIViewController, UIScrollViewDelegate {
+open class YPBottomPager: UIViewController, UIScrollViewDelegate {
     
     weak var delegate: YPBottomPagerDelegate?
     var controllers = [UIViewController]() { didSet { reload() } }
@@ -27,7 +26,7 @@ public class YPBottomPager: UIViewController, UIScrollViewDelegate {
         return controllers[currentPage]
     }
     
-    override public func loadView() {
+    override open func loadView() {
         self.automaticallyAdjustsScrollViewInsets = false
         v.scrollView.delegate = self
         view = v
@@ -94,16 +93,19 @@ public class YPBottomPager: UIViewController, UIScrollViewDelegate {
     }
 
     func selectPage(_ page: Int) {
-        if page != currentPage {
-            currentPage = page
-            //select menut item and deselect others
-            for mi in v.header.menuItems {
+        guard page != currentPage && page >= 0 && page < controllers.count else {
+            return
+        }
+        currentPage = page
+        //select menu item and deselect others
+        for (i, mi) in v.header.menuItems.enumerated() {
+            if (i == page) {
+                mi.select()
+            } else {
                 mi.deselect()
             }
-            let currentMenuItem = v.header.menuItems[page]
-            currentMenuItem.select()
-            delegate?.pagerDidSelectController(controllers[page])
         }
+        delegate?.pagerDidSelectController(controllers[page])
     }
     
     func startOnPage(_ page: Int) {
